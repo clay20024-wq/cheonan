@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>가보고 싶은 세계도시 룰렛</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;--card:rgba(255,255,255,.92);--text:#172033;--muted:#6b7280;
+      --line:#e5e7eb;--primary:#4f46e5;--primary2:#7c3aed;--accent:#06b6d4;
+      --shadow:0 18px 50px rgba(31,41,55,.09);--radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;font-family:Inter,Pretendard,"Noto Sans KR",system-ui,-apple-system,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 0%,rgba(79,70,229,.13),transparent 30%),
+        radial-gradient(circle at 90% 0%,rgba(6,182,212,.11),transparent 28%),
+        linear-gradient(180deg,#f8fafc,#f3f4f6);
+    }
+    .wrap{width:min(1180px,calc(100% - 28px));margin:auto;padding:36px 0 60px}
+    .hero{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:22px}
+    .hero h1{margin:0 0 8px;font-size:clamp(29px,4vw,46px);letter-spacing:-.045em}
+    .hero p{margin:0;color:var(--muted);line-height:1.7;font-size:14px}
+    .badge{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:white;
+      box-shadow:var(--shadow);font-weight:800;font-size:12px;color:var(--primary);white-space:nowrap}
+    .layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(340px,.88fr);gap:20px;align-items:start}
+    .panel{background:var(--card);border:1px solid rgba(255,255,255,.85);border-radius:var(--radius);
+      box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(12px)}
+    .panel-head{padding:21px 20px 13px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .panel-head h2{margin:0;font-size:18px;letter-spacing:-.02em}
+    .panel-head span{font-size:12px;color:var(--muted)}
+    .tasks{padding:0 15px 15px;display:grid;gap:11px}
+    .task-card{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.88);padding:15px;
+      transition:.18s ease}
+    .task-card:hover{transform:translateY(-1px);border-color:#c7d2fe;box-shadow:0 10px 24px rgba(79,70,229,.07)}
+    .task-top{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+    .task-index{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:white;
+      background:linear-gradient(135deg,var(--primary),var(--primary2));font-size:13px;font-weight:900;flex:none}
+    .task-name{flex:1;min-width:0;border:1px solid #edf0f4;background:#f9fafb;border-radius:12px;padding:10px 12px;
+      outline:none;font:inherit;font-weight:800;color:var(--text)}
+    .task-name:focus{border-color:#a5b4fc;box-shadow:0 0 0 4px rgba(99,102,241,.09)}
+    .slider-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .metric{background:#f8fafc;border:1px solid #eef2f7;border-radius:14px;padding:10px 11px}
+    .metric-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px;font-size:12px;color:var(--muted)}
+    .metric-head strong{color:var(--text);font-size:14px}
+    .metric small{display:block;color:#94a3b8;font-size:10px;margin-top:4px}
+    input[type="range"]{width:100%;accent-color:var(--primary);cursor:pointer}
+    .actions{display:flex;gap:10px;padding:0 15px 18px}
+    button{border:0;cursor:pointer;font:inherit;font-weight:900;transition:.15s ease}
+    button:active{transform:scale(.985)}
+    .btn-primary{flex:1;min-height:50px;border-radius:14px;color:white;
+      background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:0 13px 27px rgba(79,70,229,.2)}
+    .btn-secondary{min-width:128px;min-height:50px;border-radius:14px;border:1px solid var(--line);background:white;color:var(--text)}
+    .right{display:grid;gap:20px}
+    .results{padding:0 15px 17px;display:grid;gap:10px;min-height:120px}
+    .empty{padding:25px 16px;text-align:center;border:1px dashed #d7dce3;border-radius:16px;color:var(--muted);font-size:13px;line-height:1.6}
+    .result-row{border:1px solid var(--line);border-radius:16px;padding:13px;background:white;animation:pop .3s ease both}
+    .result-row.top{border-color:#fbbf24;background:linear-gradient(135deg,#fff9db,#fff);box-shadow:0 12px 28px rgba(245,158,11,.13)}
+    .result-title{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:9px}
+    .rank{font-size:14px;font-weight:950}.score{font-weight:950;color:var(--primary)}.top .score{color:#b45309}
+    .top-badge{display:inline-block;margin-left:7px;padding:3px 7px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:9px;font-weight:900}
+    .bar-track{height:10px;border-radius:999px;background:#eef2f7;overflow:hidden}
+    .bar{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width .7s cubic-bezier(.2,.8,.2,1)}
+    .top .bar{background:linear-gradient(90deg,#f59e0b,#f97316)}
+    .formula{padding:0 15px 16px;font-size:11px;color:var(--muted);line-height:1.65}
+    .roulette-card{padding:19px}
+    .roulette-stage{position:relative;height:245px;display:grid;place-items:center;margin:4px 0 10px}
+    .pointer{position:absolute;top:2px;left:50%;transform:translateX(-50%);z-index:5;width:0;height:0;
+      border-left:15px solid transparent;border-right:15px solid transparent;border-top:26px solid #111827;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))}
+    .wheel{width:210px;height:210px;border-radius:50%;position:relative;border:10px solid white;box-shadow:0 16px 35px rgba(31,41,55,.18);
+      transition:transform 3.3s cubic-bezier(.12,.72,.08,1);background:#6366f1}
+    .wheel::after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%);
+      border-radius:50%;background:white;border:8px solid #111827;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:3}
+    .wheel-labels{position:absolute;inset:0;border-radius:50%;z-index:2;pointer-events:none}
+    .wheel-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:82px;
+      max-width:82px;
+      text-align:center;
+      font-size:13px;
+      line-height:1.15;
+      font-weight:950;
+      transform-origin:0 0;
+      overflow-wrap:anywhere;
+      word-break:keep-all;
+      padding:3px 4px;
+      border-radius:8px;
+      text-shadow:0 1px 4px rgba(0,0,0,.25);
+      letter-spacing:-.02em;
+      pointer-events:none;
+    }
+    .roulette-label{text-align:center;min-height:20px;color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:10px}
+    .roulette-result{min-height:54px;display:grid;place-items:center;text-align:center;padding:11px;border-radius:14px;border:1px solid var(--line);
+      background:#f8fafc;font-weight:950;margin-bottom:11px}
+    .btn-roulette{width:100%;min-height:50px;border-radius:14px;background:#111827;color:white;box-shadow:0 12px 26px rgba(17,24,39,.16)}
+    .notice{margin-top:11px;padding:11px 12px;border-radius:13px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:11px;line-height:1.55}
+    .source{margin-top:10px;padding:10px 12px;border-radius:13px;background:#f8fafc;border:1px solid var(--line);font-size:10.5px;color:#64748b;line-height:1.55}
+    .footer{text-align:center;color:#94a3b8;font-size:10.5px;margin-top:16px}
+    @keyframes pop{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.right{grid-template-columns:1fr 1fr}.hero{align-items:flex-start;flex-direction:column}}
+    @media(max-width:700px){.wrap{width:min(100% - 18px,1180px);padding-top:22px}.slider-grid{grid-template-columns:1fr}.right{grid-template-columns:1fr}
+      .actions{flex-direction:column}.btn-secondary{width:100%}.panel-head{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <h1>🌍 가보고 싶은 세계도시 룰렛</h1>
+      <p>관심 있는 도시를 비교해 나만의 여행 우선순위를 만들고,<br>결정이 어려울 때는 재미용 룰렛으로 한 도시를 뽑아보세요.</p>
+    </div>
+    <div class="badge">TRAVEL PRIORITY + ROULETTE</div>
+  </section>
+
+  <section class="layout">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>세계도시 후보</h2>
+          <span>최대 6개 · 도시명과 평가값을 자유롭게 바꿀 수 있어요.</span>
+        </div>
+        <span id="count">6개 활성</span>
+      </div>
+
+      <div class="tasks" id="taskList"></div>
+
+      <div class="actions">
+        <button class="btn-primary" id="calcBtn">우선순위 계산</button>
+        <button class="btn-secondary" id="addBtn">최대 6개</button>
+      </div>
+    </section>
+
+    <div class="right">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>여행 우선순위 결과</h2>
+            <span>100점 기준 환산</span>
+          </div>
+        </div>
+        <div class="results" id="results">
+          <div class="empty">왼쪽에서 평가값을 조정한 뒤<br><b>우선순위 계산</b>을 눌러주세요.</div>
+        </div>
+        <div class="formula">
+          가중치: 역사성 40% · 도시화 35% · 음식 25%<br>
+          점수 = (역사성×40 + 도시화×35 + 음식×25) ÷ 5
+        </div>
+      </section>
+
+      <section class="panel roulette-card">
+        <div class="panel-head" style="padding:0 0 7px">
+          <div>
+            <h2>🎯 오늘 먼저 볼 도시 뽑기</h2>
+            <span>재미용 랜덤 선택</span>
+          </div>
+        </div>
+
+        <div class="roulette-stage">
+          <div class="pointer"></div>
+          <div class="wheel" id="wheel">
+            <div class="wheel-labels" id="wheelLabels"></div>
+          </div>
+        </div>
+
+        <div class="roulette-label" id="rouletteLabel">버튼을 누르면 도시들이 돌아가다가 하나가 선택됩니다.</div>
+        <div class="roulette-result" id="rouletteResult">아직 뽑지 않았어요</div>
+        <button class="btn-roulette" id="rouletteBtn">✈️ 오늘 먼저 볼 도시 뽑기</button>
+
+        <div class="notice">
+          룰렛은 재미를 위한 보조 기능입니다. 실제 여행지 선택은 예산, 안전, 입국요건, 계절, 이동시간, 개인 취향 등을 함께 고려해 결정하세요.
+        </div>
+        <div class="source">
+          기본 6개 도시는 Euromonitor International의 2025 국제 방문객 상위 도시 자료를 참고해 구성했습니다.
+          기본값은 순위를 뜻하지 않으며, 슬라이더 평가는 사용자가 직접 정하도록 모두 3점으로 시작합니다.
+        </div>
+      </section>
+    </div>
+  </section>
+  <div class="footer">가보고 싶은 세계도시 룰렛 · 단일 HTML 버전</div>
+</main>
+
+<script>
+  const defaults = ["방콕", "홍콩", "런던", "마카오", "이스탄불", "두바이"];
+  const taskList = document.getElementById("taskList");
+  const results = document.getElementById("results");
+  const calcBtn = document.getElementById("calcBtn");
+  const addBtn = document.getElementById("addBtn");
+  const count = document.getElementById("count");
+  const rouletteBtn = document.getElementById("rouletteBtn");
+  const rouletteResult = document.getElementById("rouletteResult");
+  const rouletteLabel = document.getElementById("rouletteLabel");
+  const wheel = document.getElementById("wheel");
+  const wheelLabels = document.getElementById("wheelLabels");
+
+  let rotation = 0;
+  let spinning = false;
+
+  function escapeHtml(s){
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+
+  function metric(key, label, sub, value=3){
+    return `
+      <label class="metric">
+        <div class="metric-head"><span>${label}</span><strong data-value-for="${key}">${value}</strong></div>
+        <input type="range" min="1" max="5" step="1" value="${value}" data-key="${key}" aria-label="${label}">
+        <small>${sub}</small>
+      </label>`;
+  }
+
+  function addCity(name=""){
+    if(taskList.children.length>=6) return;
+    const card=document.createElement("div");
+    card.className="task-card";
+    card.innerHTML=`
+      <div class="task-top">
+        <div class="task-index">${taskList.children.length+1}</div>
+        <input class="task-name" type="text" maxlength="30" value="${escapeHtml(name)}" placeholder="도시명을 입력하세요">
+      </div>
+      <div class="slider-grid">
+        ${metric("history","역사성","볼거리 가중치 40%")}
+        ${metric("urban","도시화","교통·도시 편의 가중치 35%")}
+        ${metric("food","음식","여행 만족 가중치 25%")}
+      </div>`;
+    taskList.appendChild(card);
+
+    card.querySelectorAll('input[type="range"]').forEach(sl=>{
+      sl.addEventListener("input",e=>{
+        card.querySelector(`[data-value-for="${e.target.dataset.key}"]`).textContent=e.target.value;
+      });
+    });
+    card.querySelector(".task-name").addEventListener("input",updateWheel);
+    refresh();
+  }
+
+  function refresh(){
+    [...taskList.children].forEach((c,i)=>c.querySelector(".task-index").textContent=i+1);
+    count.textContent=`${taskList.children.length}개 활성`;
+    const full=taskList.children.length>=6;
+    addBtn.disabled=full; addBtn.style.opacity=full?".45":"1"; addBtn.textContent=full?"최대 6개":"+ 도시 추가";
+    updateWheel();
+  }
+
+  function getCities(){
+    return [...taskList.querySelectorAll(".task-card")].map((card,i)=>{
+      const name=card.querySelector(".task-name").value.trim()||`도시 ${i+1}`;
+      const history=Number(card.querySelector('[data-key="history"]').value);
+      const urban=Number(card.querySelector('[data-key="urban"]').value);
+      const food=Number(card.querySelector('[data-key="food"]').value);
+      const raw=history*40+urban*35+food*25;
+      const score=Math.round((raw/5)*10)/10;
+      return {name,history,urban,food,score,order:i};
+    });
+  }
+
+  function renderResults(){
+    const sorted=getCities().sort((a,b)=>b.score-a.score||a.order-b.order);
+    results.innerHTML="";
+    sorted.forEach((c,i)=>{
+      const row=document.createElement("div");
+      row.className=`result-row ${i===0?"top":""}`;
+      row.style.animationDelay=`${i*55}ms`;
+      row.innerHTML=`
+        <div class="result-title">
+          <div><span class="rank">${i+1}위 · ${escapeHtml(c.name)}</span>${i===0?'<span class="top-badge">TOP PICK</span>':""}</div>
+          <div class="score">${c.score.toFixed(1)}점</div>
+        </div>
+        <div class="bar-track"><div class="bar" data-width="${c.score}"></div></div>`;
+      results.appendChild(row);
+    });
+    requestAnimationFrame(()=>{
+      results.querySelectorAll(".bar").forEach(b=>b.style.width=`${Math.min(100,Number(b.dataset.width))}%`);
+    });
+  }
+
+  function updateWheel(){
+    const names=[...taskList.querySelectorAll(".task-name")].map((input,i)=>input.value.trim()||`도시 ${i+1}`);
+    const colors=["#4f46e5","#06b6d4","#8b5cf6","#14b8a6","#f59e0b","#ef4444"];
+    const textColors=["#ffffff","#073b4c","#ffffff","#063f37","#4b2a00","#ffffff"];
+    const n=Math.max(names.length,1), seg=360/n;
+
+    wheel.style.background=`conic-gradient(${names.map((_,i)=>`${colors[i%colors.length]} ${i*seg}deg ${(i+1)*seg}deg`).join(",")})`;
+    wheelLabels.innerHTML="";
+
+    names.forEach((name,i)=>{
+      const label=document.createElement("div");
+      label.className="wheel-label";
+      label.textContent=name;
+      label.style.color=textColors[i%textColors.length];
+
+      // Put each label on the center line of its segment and keep it inside the colored slice.
+      const angle=i*seg+seg/2;
+      const radius = n === 6 ? 58 : n === 5 ? 60 : n === 4 ? 62 : 56;
+
+      // Slightly reduce font only for very long names so text still stays inside its slice.
+      if(name.length >= 9) label.style.fontSize="11px";
+      else if(name.length >= 6) label.style.fontSize="12px";
+      else label.style.fontSize="13px";
+
+      label.style.transform=
+        `rotate(${angle}deg) translate(${radius}px,-50%) rotate(${-angle}deg) translate(-50%,-50%)`;
+
+      wheelLabels.appendChild(label);
+    });
+  }
+
+  function spin(){
+    if(spinning) return;
+    const cities=getCities();
+    if(!cities.length) return;
+
+    spinning=true; rouletteBtn.disabled=true; rouletteBtn.style.opacity=".65";
+    rouletteResult.textContent="돌아가는 중...";
+    rouletteLabel.textContent="여행 후보를 섞고 있습니다.";
+
+    const selected=Math.floor(Math.random()*cities.length);
+    const seg=360/cities.length;
+    const targetCenter=selected*seg+seg/2;
+    rotation += (5+Math.floor(Math.random()*3))*360 + (360-targetCenter);
+    wheel.style.transform=`rotate(${rotation}deg)`;
+
+    let t=0;
+    const ticker=setInterval(()=>{rouletteResult.textContent=cities[t++%cities.length].name},120);
+
+    setTimeout(()=>{
+      clearInterval(ticker);
+      rouletteResult.innerHTML=`🎉 <span>${escapeHtml(cities[selected].name)}</span>`;
+      rouletteLabel.textContent="오늘 먼저 살펴볼 도시로 선택됐어요.";
+      spinning=false; rouletteBtn.disabled=false; rouletteBtn.style.opacity="1";
+    },3350);
+  }
+
+  calcBtn.addEventListener("click",renderResults);
+  addBtn.addEventListener("click",()=>addCity(""));
+  rouletteBtn.addEventListener("click",spin);
+
+  defaults.forEach(addCity);
+  renderResults();
+</script>
+</body>
+</html>
